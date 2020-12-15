@@ -462,3 +462,34 @@ func TestPreimage(t *testing.T) {
 	require.NoError(err)
 	require.Equal([]byte("hen"), []byte(k))
 }
+
+type Worker interface {
+	logError(err error)
+}
+type Factory interface {
+	NewStateDBAdapter(sm protocol.StateManager,
+		blockHeight uint64,
+		notFixTopicCopyBug bool,
+		asyncContractTrie bool,
+		executionHash hash.Hash256,
+		opts ...StateDBOption) Worker
+}
+
+type AbastFactory struct {
+}
+
+func (ths *AbastFactory) NewStateDBAdapter(sm protocol.StateManager,
+	blockHeight uint64,
+	notFixTopicCopyBug bool,
+	asyncContractTrie bool,
+	executionHash hash.Hash256,
+	opts ...StateDBOption) Worker {
+	return NewStateDBAdapter(sm, blockHeight, notFixTopicCopyBug, asyncContractTrie, executionHash, opts...)
+
+}
+func TestFactoryForStateDBAdapter(t *testing.T) {
+	var f Factory
+	f = new(AbastFactory)
+	w := f.NewStateDBAdapter()
+	w.logError()
+}
